@@ -29,7 +29,7 @@ The following **additional** features are implemented:
 
 ## Video Walkthrough
 
-<img src='walkthrough-2.gif' title='Video Walkthrough' alt='Video Walkthrough' />
+<img src='walthrough-2.gif' title='Video Walkthrough' alt='Video Walkthrough' />
 
 
 
