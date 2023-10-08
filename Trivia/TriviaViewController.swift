@@ -11,91 +11,93 @@ class TriviaViewController: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        questionList = createMockData()
-        display(with: questionList[index])
-        choiceButton1.layer.cornerRadius = 15
-        choiceButton2.layer.cornerRadius = 15
-        choiceButton3.layer.cornerRadius = 15
-        choiceButton4.layer.cornerRadius = 15
+        Task.init {
+            await fetchTrivia()
+            if index < questionList.count{
+                answerChoices = questionList[index].answers
+                createButtons(answerChoices)
+            }
+            
+        }
     }
-    
     
     @IBOutlet weak var questionCount: UILabel!
     @IBOutlet weak var questionCategory: UILabel!
     @IBOutlet weak var questionContent: UILabel!
     
-    @IBOutlet weak var choiceButton1: UIButton!
-    @IBOutlet weak var choiceButton2: UIButton!
-    @IBOutlet weak var choiceButton3: UIButton!
-    @IBOutlet weak var choiceButton4: UIButton!
     
+    private var questionList: [Trivia.Result] = []
+    private var answerChoices: [Choice] = []
+    private var index = 0
+    private var points = 0
     
-    @IBAction func clickedButton(_ sender: UIButton) {
+    func fetchTrivia() async {
         
-        let clickedChoice = sender.titleLabel?.text
-        let question = questionList[index]
+        guard let url = URL(string: "https://opentdb.com/api.php?amount=10") else { fatalError("Missing")}
+        let urlRequest = URLRequest(url:url)
         
-        if clickedChoice == question.correctChoice{
-            points += 1
+        do{
+            let (data, response) = try await URLSession.shared.data(for: urlRequest)
+            
+            guard (response as? HTTPURLResponse)?.statusCode == 200 else { fatalError("Error while fetching data") }
+            
+            let decoder = JSONDecoder()
+            decoder.keyDecodingStrategy = .convertFromSnakeCase
+            let decodedData = try decoder.decode(Trivia.self, from: data)
+            DispatchQueue.main.async {
+                // Reset variables before assigning new values, for when the user plays the game another time
+                self.index = 0
+                self.points = 0
+                // Set new values for all variables
+                self.questionList = decodedData.results
+                self.display()
+            }
+            
+        } catch {
+            print("Error: \(error)")
         }
+        
+    }
+    
+    
+    private func display() {
+        let question = questionList[index]
+        questionCount.text = "Question: " + String(index+1) + "/" + String(questionList.count)
+        questionContent.text = question.question
+        questionCategory.text = question.category
+        answerChoices = question.answers
+        createButtons(answerChoices)
+    }
+    
+    func createButtons(_ answerChoices: [Choice]) {
+        view.subviews.compactMap { $0 as? UIButton }.forEach { $0.removeFromSuperview() }
+        let buttonWidth: CGFloat = 300
+        let buttonHeight: CGFloat = 50
+        
+        for (index, answer) in answerChoices.enumerated() {
+            let button = UIButton(type: .system)
+            button.setTitle(answer.text, for: .normal)
+            button.frame = CGRect(x: (view.frame.width - buttonWidth) / 2, y: CGFloat(index) * (buttonHeight + 20) + 450, width: buttonWidth, height: buttonHeight)
+            button.backgroundColor = UIColor(red: 0.8, green: 0.8, blue: 1.0, alpha: 1.0)
+            button.layer.cornerRadius = 10
+            button.addTarget(self, action: #selector(buttonTapped(_:)), for: .touchUpInside)
+            button.tag = index
+            view.addSubview(button)
+        }
+    }
+    @objc func buttonTapped(_ sender: UIButton){
+        let selectedIndex = sender.tag
+        let selectedAnswer = answerChoices[selectedIndex]
+        if selectedAnswer.isCorrect {
+            points += 1
+        } 
         index += 1
         
         if index < questionList.count {
-            display(with: questionList[index])
+            display()
         } else {
             gameOver()
         }
-    }
-    
-    private var questionList = [Question]()
-    private var index = 0
-    private var points = 0
-    private func createMockData() -> [Question] {
-        let mockData1 = Question(
-            number: 1,
-            category: "Entertainment",
-            content: "What was the first feature-length animated movie ever released?",
-            choice1: "Spirited Away",
-            choice2: "Snow White and the Seven Dwarfs",
-            choice3: "Anastasia",
-            choice4: "The Thief and the Cobbler",
-            correctChoice: "Snow White and the Seven Dwarfs"
-        )
-        
-        let mockData2 = Question(
-            number: 2,
-            category: "Food and Drink",
-            content: "What is the rarest M&M color?",
-            choice1: "Red",
-            choice2: "Green",
-            choice3: "Purple",
-            choice4: "Brown",
-            correctChoice: "Brown"
-        )
-        
-        let mockData3 = Question(
-            number: 3,
-            category: "Sports",
-            content: "Which Basketball team has completed two threepeats",
-            choice1: "Chicago Bulls",
-            choice2: "San Francisco Warriors",
-            choice3: "Los Angeles Lakers",
-            choice4: "Boston Celtics",
-            correctChoice: "Chicago Bulls"
-        )
-        
-        return [mockData1, mockData2, mockData3]
-    }
-    
-    private func display(with question: Question) {
-        questionCount.text = "Question: " + String(question.number) + "/" + String(questionList.count)
-        questionContent.text = question.content
-        questionCategory.text = question.category
-        choiceButton1.setTitle(question.choice1, for: .normal)
-        choiceButton2.setTitle(question.choice2, for: .normal)
-        choiceButton3.setTitle(question.choice3, for: .normal)
-        choiceButton4.setTitle(question.choice4, for: .normal)
-        
     }
     
     func gameOver(){
@@ -107,8 +109,9 @@ class TriviaViewController: UIViewController {
     }
     
     func restart(){
-        points = 0
-        index = 0
-        display(with: questionList[index])
+        Task.init {
+            await fetchTrivia()
+        }
     }
+   
 }
