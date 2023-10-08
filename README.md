@@ -1,8 +1,8 @@
-# Project 3 - Trivia Game
+# Project 4 - Trivia
 
 Submitted by: Lana Do
 
-Trivia is an app that let users play a simple of trivia
+Trivia is an app that users can play a simple game of trivia
 
 Time spent: 4 hours spent in total
 
@@ -10,24 +10,28 @@ Time spent: 4 hours spent in total
 
 The following **required** functionality is completed:
 
-- [x] User can view the current question and 4 different answers
-- [x] User can view the next question after tapping an answer
-- [x] User can answer at least 3 different questions
+- [x] User can view and answer at least 5 trivia questions.
+- [x] App retrieves question data from the Open Trivia Database API.
+- [x] Fetch a different set of questions if the user indicates they would like to reset the game.
+- [x] Users can see score after submitting all questions.
+- [x] True or False questions only have two options.
 
 
 The following **optional** features are implemented:
 
-- [ ] User can use the vertical orientation of the app on any device
-- [x] User can track the question they are on and how many questions are left
-- [x] User can see how many questions they got correct after answering all questions
-- [x] User should be able to restart the game after they've finished answering all questions
+  
+- [ ] Allow the user to choose a specific category of questions.
+- [ ] Provide the user feedback on whether each question was correct before navigating to the next.
 
 The following **additional** features are implemented:
 
 - [ ] List anything else that you can get done to improve the app functionality!
 
 ## Video Walkthrough
-<img src='walkthrough.gif' title='Video Walkthrough' alt='Video Walkthrough' />
+
+Here is a reminder on how to embed Loom videos on GitHub. Feel free to remove this reminder once you upload your README. 
+
+
 
 ## Notes
 
@@ -35,7 +39,7 @@ Describe any challenges encountered while building the app.
 
 ## License
 
-    Copyright [2023] [Lana Do]
+    Copyright [10/2023] [Lana Do]
 
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
